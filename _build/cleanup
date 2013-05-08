@@ -1,5 +1,0 @@
-do{ my $x = {
-       'Google-Shopping-*' => 1,
-       'Google-Shopping-0.02' => 1
-     };
-$x; }
