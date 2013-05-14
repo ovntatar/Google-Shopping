@@ -1,5 +1,19 @@
 package Google::Shopping;
 
+use 5.006;
+use strict;
+use warnings;
+
+=head1 NAME
+
+Google::Shopping - Perl implementation of Search API for Google Shopping!
+
+=head1 VERSION
+
+Version 0.02
+
+=cut
+
 use Moose;
 use MooseX::Params::Validate;
 use Moose::Util::TypeConstraints;
@@ -52,11 +66,28 @@ around BUILDARGS => sub
     }
 };
 
+=head1 SUBROUTINES/METHODS
+
+=head2 BUILD
+
+Check if country and api parameter available!
+
+=cut
+
+
 sub BUILD
 {
   my $self = shift;
   croak("ERROR: country and api_key must be specified.\n") unless ($self->country || $self->api_key);
 }
+
+=head2 search
+
+Generate URL with parameters values and send HTTP Request!
+
+=cut
+
+
 
 sub search
 {
@@ -99,25 +130,9 @@ __PACKAGE__->meta->make_immutable;
 no Moose; 
 no Moose::Util::TypeConstraints;
 
-1; 
-
-
-	
-
-__END__
-
-
-=head1 NAME
-
-Google::Shopping - a interface to  Google::Shopping!
-
-=head1 VERSION
-
-Version 0.02
-
 =head1 SYNOPSIS
 
-Google::Shopping - is a interface to Google Shopping Search API.
+Google::Shopping - usage!
 
 	use strict; 
 	use warnings;
@@ -137,8 +152,6 @@ Google::Shopping - is a interface to Google Shopping Search API.
 	 print $items->{product}->{inventories}->[0]->{price} ;
 	 print $items->{product}->{inventories}->[0]->{currency} . "\n";
 	}
-    ...
-
 
 =head1 AUTHOR
 
@@ -160,9 +173,6 @@ You can also look for information at: https://github.com/ovntatar/GoogleShopping
 or on the Google official api documnetation site: https://developers.google.com/shopping-search/v1/getting_started#filters
 
 
-=head1 ACKNOWLEDGEMENTS
-
-
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2013 Ovidiu Nita Tatar.
@@ -173,5 +183,7 @@ by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
 
+=cut
 
+1;
 
