@@ -10,7 +10,7 @@ Google::Shopping - Perl implementation of Search API for Google Shopping!
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
@@ -30,7 +30,7 @@ use HTTP::Request;
 use LWP::UserAgent;
 
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 Readonly my $API_VERSION => 'v1';
 Readonly my $BASE_URL    => "https://www.googleapis.com/shopping/search/$API_VERSION/public";
