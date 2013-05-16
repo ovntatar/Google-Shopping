@@ -10,7 +10,7 @@ Google::Shopping - Perl implementation of Search API for Google Shopping!
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
@@ -30,7 +30,7 @@ use HTTP::Request;
 use LWP::UserAgent;
 
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 Readonly my $API_VERSION => 'v1';
 Readonly my $BASE_URL    => "https://www.googleapis.com/shopping/search/$API_VERSION/public";
@@ -159,7 +159,7 @@ Ovidiu Nita Tatar, C<< <ovn.tatar at gmail.com> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to: https://github.com/ovntatar/GoogleShopping/issues
+Please report any bugs or feature requests to: https://github.com/ovntatar/Google-Shopping/issues
 
 =head1 SUPPORT
 
@@ -168,7 +168,7 @@ You can find documentation for this module with the perldoc command.
     perldoc Google::Shopping
 
 
-You can also look for information at: https://github.com/ovntatar/GoogleShopping
+You can also look for information at: https://github.com/ovntatar/Google-Shopping
 
 or on the Google official api documnetation site: https://developers.google.com/shopping-search/v1/getting_started#filters
 
