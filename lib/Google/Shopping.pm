@@ -22,46 +22,50 @@ use namespace::clean;
 use Carp;
 use Data::Dumper;
 
-
 use JSON;
 use XML::Simple;
 use Readonly;
 use HTTP::Request;
 use LWP::UserAgent;
 
-
 our $VERSION = '0.04';
 
 Readonly my $API_VERSION => 'v1';
-Readonly my $BASE_URL    => "https://www.googleapis.com/shopping/search/$API_VERSION/public";
+Readonly my $BASE_URL =>
+  "https://www.googleapis.com/shopping/search/$API_VERSION/public";
 
-type 'OutputFormat' => where { /\bjson\b|\batom\b/i  };
+type 'OutputFormat' => where { /\bjson\b|\batom\b/i };
 type 'TrueFalse'    => where { /\btrue\b|\bfalse\b/i };
-has  'api_key'      => (is => 'ro', isa => 'Str', required => 1);
-has  'country'      => (is => 'ro', isa => 'Str');
-has  'products'		=> (is => 'ro', isa => 'Str', default => 'products', required => 1);
-has  'cref'         => (is => 'ro', isa => 'Str');
-has  'alt'          => (is => 'ro', isa => 'OutputFormat', default => 'json');
-has  'rankBy'       => (is => 'rw', isa => 'Str');
-has  'crowdBy'      => (is => 'rw', isa => 'Str');
-has  'spelling_enable'     => (is => 'rw', isa => 'TrueFalse', default => 'true');
-has  'facets_enable'       => (is => 'rw', isa => 'TrueFalse', default => 'true');
-has  'facets_include'      => (is => 'rw', isa => 'Str');
-has  'brand'        => (is => 'rw', isa => 'Str');
-has	 'language' 	=> (is => 'ro', isa => 'Str', default => 'en');
-has  'browser'      => (is => 'rw', isa => 'LWP::UserAgent', default => sub { return LWP::UserAgent->new(); });
+has 'api_key' => ( is => 'ro', isa => 'Str', required => 1 );
+has 'country' => ( is => 'ro', isa => 'Str' );
+has 'products' =>
+  ( is => 'ro', isa => 'Str', default => 'products', required => 1 );
+has 'cref'    => ( is => 'ro', isa => 'Str' );
+has 'alt'     => ( is => 'ro', isa => 'OutputFormat', default => 'json' );
+has 'rankBy'  => ( is => 'rw', isa => 'Str' );
+has 'crowdBy' => ( is => 'rw', isa => 'Str' );
+has 'spelling_enable' => ( is => 'rw', isa => 'TrueFalse', default => 'true' );
+has 'facets_enable' => ( is => 'rw', isa => 'TrueFalse', default => 'true' );
+has 'facets_include' => ( is => 'rw', isa => 'Str' );
+has 'brand'          => ( is => 'rw', isa => 'Str' );
+has 'language'       => ( is => 'ro', isa => 'Str', default => 'en' );
+has 'browser' => (
+    is      => 'rw',
+    isa     => 'LWP::UserAgent',
+    default => sub { return LWP::UserAgent->new(); }
+);
 
-
-around BUILDARGS => sub
-{
+around BUILDARGS => sub {
     my $orig  = shift;
     my $class = shift;
 
-    if (@_ == 1 && ! ref $_[0]) {
-        return $class->$orig(api_key => $_[0]);
-    } elsif (@_ == 2 && ! ref $_[0]) {
-        return $class->$orig(api_key => $_[0], country => $_[1]);
-    } else {
+    if ( @_ == 1 && !ref $_[0] ) {
+        return $class->$orig( api_key => $_[0] );
+    }
+    elsif ( @_ == 2 && !ref $_[0] ) {
+        return $class->$orig( api_key => $_[0], country => $_[1] );
+    }
+    else {
         return $class->$orig(@_);
     }
 };
@@ -74,11 +78,10 @@ Check if country and api parameter available!
 
 =cut
 
-
-sub BUILD
-{
-  my $self = shift;
-  croak("ERROR: country and api_key must be specified.\n") unless ($self->country || $self->api_key);
+sub BUILD {
+    my $self = shift;
+    croak("ERROR: country and api_key must be specified.\n")
+      unless ( $self->country || $self->api_key );
 }
 
 =head2 search
@@ -87,47 +90,50 @@ Generate URL with parameters values and send HTTP Request!
 
 =cut
 
+sub search {
+    my $self = shift;
+    my ($query) = pos_validated_list(
+        \@_,
+        { isa => 'Str', required => 1 },
+        MX_PARAMS_VALIDATE_NO_CACHE => 1
+    );
 
+    my ( $browser, $url, $request, $response, $content );
+    $browser = $self->browser;
+    $url = sprintf( "%s/%s", $BASE_URL, $self->products );
+    $url .= sprintf( "?key=%s",     $self->api_key );
+    $url .= sprintf( "&country=%s", $self->country );
 
-sub search
-{
-    my $self    = shift;
-    my ($query) = pos_validated_list(\@_, { isa => 'Str', required => 1 }, MX_PARAMS_VALIDATE_NO_CACHE => 1);
+    $url .= sprintf( "&alt=%s",     $self->alt )     if $self->alt;
+    $url .= sprintf( "&rankBy=%s",  $self->rankBy )  if $self->rankBy;
+    $url .= sprintf( "&brand=%s",   $self->brand )   if $self->brand;
+    $url .= sprintf( "&crowdBy=%s", $self->crowdBy ) if $self->crowdBy;
+    $url .= sprintf( "&spelling.enabled=%s", $self->spelling_enable )
+      if $self->spelling_enable;
+    $url .= sprintf( "&facets.enabled=%s", $self->facets_enable )
+      if $self->facets_enable;
+    $url .= sprintf( "&facets.include=%s", $self->facets_include )
+      if $self->facets_include;
+    $url .= sprintf( "&q=%s",        $query );
+    $url .= sprintf( "&language=%s", $self->language );
 
-    my ($browser, $url, $request, $response, $content);
-    $browser   = $self->browser;
-    $url       = sprintf("%s/%s", $BASE_URL, $self->products);
-    $url      .= sprintf("?key=%s", $self->api_key);
-    $url 	  .= sprintf("&country=%s", $self->country);
-    
-   
-    $url .= sprintf("&alt=%s",    $self->alt)    if $self->alt;
-    $url .= sprintf("&rankBy=%s", $self->rankBy)    if $self->rankBy;
-    $url .= sprintf("&brand=%s", $self->brand)    if $self->brand;
-    $url .= sprintf("&crowdBy=%s", $self->crowdBy)    if $self->crowdBy;
-    $url .= sprintf("&spelling.enabled=%s", $self->spelling_enable)    if $self->spelling_enable;
-    $url .= sprintf("&facets.enabled=%s", $self->facets_enable)    if $self->facets_enable;
-    $url .= sprintf("&facets.include=%s", $self->facets_include)    if $self->facets_include;
-    $url .= sprintf("&q=%s",      $query);
-    $url .= sprintf("&language=%s",      $self->language);
-
-
-    $request  = HTTP::Request->new(GET => $url);
+    $request = HTTP::Request->new( GET => $url );
     $response = $browser->request($request);
-    	
-    croak("ERROR: Couldn't fetch data [$url]:[".$response->status_line."]\n") unless $response->is_success;
-    $content  = $response->content;
+
+    croak(
+        "ERROR: Couldn't fetch data [$url]:[" . $response->status_line . "]\n" )
+      unless $response->is_success;
+    $content = $response->content;
     croak("ERROR: No data found.\n") unless defined $content;
-    if (defined $self->alt && ($self->alt =~ /atom/i)) {
+    if ( defined $self->alt && ( $self->alt =~ /atom/i ) ) {
         $content = XMLin($content);
     }
-    
+
     return $content;
 }
 
-
 __PACKAGE__->meta->make_immutable;
-no Moose; 
+no Moose;
 no Moose::Util::TypeConstraints;
 
 =head1 SYNOPSIS
