@@ -1,3 +1,9 @@
+#====================================================================== 	
+	Unfortunately the Google Search API for Shopping has been shut down,
+	therefore this module will no longer support.   
+#======================================================================
+
+
 Google-Shopping
 
 Perl implementation of Search API for Google Shopping!
